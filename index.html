@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <form>
+    <input type="file" name="file" />
+    <button type="submit">submit</button>
+  </form>
+
+  <script>
+    const form = document.querySelector('form');
+    const file = document.querySelector('input[name="file"]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const {url, fields} = await fetch("http://localhost:8081/signed-url").then(response => response.json())
+      console.log(url);
+      const data = {
+        bucket: "exdev-contents",
+        ...fields,
+        'Content-Type': file.files[0].type,
+        file: file.files[0],
+      };
+
+      const formData = new FormData();
+      for (const name in data) {
+        formData.append(name, data[name]);
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: "no-cors",
+        cache: "no-cache",
+        headers: { 
+            'Access-Control-Allow-Origin': '*',
+            'Accept': 'application/json',
+        },
+        body: formData,
+      });
+
+      console.log(response);
+    });
+  </script>
+</body>
+</html>
